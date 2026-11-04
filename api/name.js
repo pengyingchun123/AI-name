@@ -3,11 +3,12 @@
  * 流式输出 AI 起名结果，完成后把记录写入 Supabase。
  *
  * 环境变量（全部在 Vercel 项目设置里填，不要写进代码或提交到仓库）：
- *   AI_API_KEY        模型平台的 API Key（必填）
- *   AI_BASE_URL       模型平台的 OpenAI 兼容地址，默认 https://api.openai.com/v1
- *   AI_MODEL          模型名，例如 gpt-4o-mini（按你自己的平台改）
+ *   ARK_API_KEY       火山方舟 API Key，请求头 Authorization: Bearer $ARK_API_KEY（必填）
+ *   ARK_MODEL         可选，默认 doubao-seed-2-1-pro-260628；也可填控制台接入点 ep-xxxxxxxx
+ *   ARK_BASE_URL      可选，默认 https://ark.cn-beijing.volces.com/api/v3
  *   SUPABASE_URL      Supabase 项目地址，例如 https://xxxx.supabase.co（选填）
  *   SUPABASE_SERVICE_ROLE_KEY  Supabase service_role Key（选填，缺了就不写库、不报错）
+ *   SUPABASE_TABLE    可选，默认 naming_records
  *
  * 请求体 JSON：
  *   { "prompt": "给茶饮品牌起名，年轻、清新", "category": "品牌", "surname": "", "style": "" }
@@ -42,7 +43,8 @@ async function saveToSupabase({ prompt, category, model, resultText, names }) {
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!url || !key) return; // 没配 Supabase 就跳过写库，不影响起名结果
 
-  const res = await fetch(`${url.replace(/\/$/, "")}/rest/v1/naming_records`, {
+  const table = process.env.SUPABASE_TABLE || "naming_records";
+  const res = await fetch(`${url.replace(/\/$/, "")}/rest/v1/${table}`, {
     method: "POST",
     headers: {
       apikey: key,
@@ -96,11 +98,11 @@ module.exports = async (req, res) => {
     return;
   }
 
-  const apiKey = process.env.AI_API_KEY;
-  const baseUrl = (process.env.AI_BASE_URL || "https://api.openai.com/v1").replace(/\/$/, "");
-  const model = process.env.AI_MODEL || "gpt-4o-mini";
+  const apiKey = process.env.ARK_API_KEY;
+  const baseUrl = (process.env.ARK_BASE_URL || "https://ark.cn-beijing.volces.com/api/v3").replace(/\/$/, "");
+  const model = process.env.ARK_MODEL || "doubao-seed-2-1-pro-260628";
   if (!apiKey) {
-    res.status(500).json({ error: "服务端未配置 AI_API_KEY，请在 Vercel 环境变量里设置" });
+    res.status(500).json({ error: "服务端未配置 ARK_API_KEY，请在 Vercel 环境变量里设置" });
     return;
   }
 
