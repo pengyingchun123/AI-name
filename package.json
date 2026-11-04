@@ -1,0 +1,1 @@
+{"description":"AI 起名网页：流式输出 3 组名字，并把记录保存到 Supabase","engines":{"node":">=18"},"name":"ai-naming","private":true,"scripts":{"deploy":"npx vercel --prod","dev":"npx vercel dev"},"version":"1.0.0"}
